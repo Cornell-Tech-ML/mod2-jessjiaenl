@@ -37,10 +37,12 @@ def index_to_position(index: Index, strides: Strides) -> int:
     storage based on strides.
 
     Args:
+    ----
         index : index tuple of ints
         strides : tensor strides
 
     Returns:
+    -------
         Position in storage
 
     """
@@ -58,6 +60,7 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     may not be the inverse of `index_to_position`.
 
     Args:
+    ----
         ordinal: ordinal position to convert.
         shape : tensor shape.
         out_index : return index corresponding to position.
@@ -65,7 +68,7 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     """
     # TODO: Implement for Task 2.1.
     # 1D array, each elem = ordinal // stride[i] and cont with ordinal % stride[i]
-    
+
     stride = strides_from_shape(shape)
     for i in range(len(stride)):
         out_index[i] = ordinal // stride[i]
@@ -82,12 +85,14 @@ def broadcast_index(
     removed.
 
     Args:
+    ----
         big_index : multidimensional index of bigger tensor
         big_shape : tensor shape of bigger tensor
         shape : tensor shape of smaller tensor
         out_index : multidimensional index of smaller tensor
 
     Returns:
+    -------
         None
 
     """
@@ -99,35 +104,39 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     """Broadcast two shapes to create a new union shape.
 
     Args:
+    ----
         shape1 : first shape
         shape2 : second shape
 
     Returns:
+    -------
         broadcasted shape
 
     Raises:
+    ------
         IndexingError : if cannot broadcast
 
     """
     # TODO: Implement for Task 2.2.
     # make sure dim1 <= dim2
-    if len(shape1) > len(shape2):
-        shape1, shape2 = shape2, shape1
-    
+    shape1_list, shape2_list = list(shape1), list(shape2)
+    if len(shape1_list) > len(shape2_list):
+        shape1_list, shape2_list = shape2_list, shape1_list
+
     # prepend 1 to shape 1 until dim1 == dim2
-    while len(shape1) < len(shape2):
-        shape1 = [1] + shape1
-    
+    while len(shape1_list) < len(shape2_list):
+        shape1_list = [1] + shape1_list
+
     # now check validity: either shape[i] == shape[j] or one of them == 1
     broadcast_shape = []
-    for i in range(len(shape1)):
-        if shape1[i] == 1:
-            broadcast_shape.append(shape2[i])
-        elif shape2[i] == 1:
-            broadcast_shape.append(shape1[i])
+    for i in range(len(shape1_list)):
+        if shape1_list[i] == 1:
+            broadcast_shape.append(shape2_list[i])
+        elif shape2_list[i] == 1:
+            broadcast_shape.append(shape1_list[i])
         # now they must be equal else can't broadcast
-        elif shape1[i] == shape2[i]:
-            broadcast_shape.append(shape1[i])
+        elif shape1_list[i] == shape2_list[i]:
+            broadcast_shape.append(shape1_list[i])
         else:
             raise IndexingError(f"Cannot broadcast shape1 {shape1} and shape2 {shape2}")
     return tuple(broadcast_shape)
@@ -185,7 +194,8 @@ class TensorData:
     def is_contiguous(self) -> bool:
         """Check that the layout is contiguous, i.e. outer dimensions have bigger strides than inner dimensions.
 
-        Returns:
+        Returns
+        -------
             bool : True if contiguous
 
         """
@@ -249,9 +259,11 @@ class TensorData:
         """Permute the dimensions of the tensor.
 
         Args:
+        ----
             *order: a permutation of the dimensions
 
         Returns:
+        -------
             New `TensorData` with the same storage and a new dimension order.
 
         """
@@ -266,16 +278,15 @@ class TensorData:
             _shape: Shape, array(shape)
             strides: UserStrides, int sequence
             shape: UserShape, int sequence
-            manipulate stride: right most 1, times accum right len to store at curr
         """
         # calculate new shape
-        new_shape = tuple([self.shape[order[i]] for i in range(len(order))])
+        new_shape = [self.shape[order[i]] for i in range(len(order))]
 
-        # calculate new stride
-        new_stride = strides_from_shape(new_shape)
+        # do not calculate new stride from this shape, that will require change in underling data to satisfy contiguous stride
+        new_stride = [self.strides[order[i]] for i in range(len(order))]
 
         # return new TensorData with new shape and strides
-        return TensorData(self._storage, new_shape, new_stride)
+        return TensorData(self._storage, tuple(new_shape), tuple(new_stride))
 
     def to_string(self) -> str:
         """Convert to string"""

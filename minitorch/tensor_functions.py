@@ -94,6 +94,7 @@ class Add(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class All(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Tensor) -> Tensor:
@@ -114,6 +115,7 @@ class Mul(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -122,6 +124,7 @@ class Sigmoid(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
+
 
 class ReLU(Function):
     @staticmethod
@@ -132,6 +135,7 @@ class ReLU(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class Log(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -140,6 +144,7 @@ class Log(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
+
 
 class Exp(Function):
     @staticmethod
@@ -150,6 +155,7 @@ class Exp(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class Sum(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -158,6 +164,7 @@ class Sum(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
+
 
 class LT(Function):
     @staticmethod
@@ -168,6 +175,7 @@ class LT(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class EQ(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -177,10 +185,12 @@ class EQ(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
+
 class IsClose(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
         return t1.f.add_zip(t1, t2)
+
 
 class Permute(Function):
     @staticmethod
@@ -190,6 +200,7 @@ class Permute(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
+
 
 class View(Function):
     @staticmethod
