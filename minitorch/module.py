@@ -30,12 +30,24 @@ class Module:
         return list(m.values())
 
     def train(self) -> None:
-        """Set the mode of this module and all descendent modules to `train`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        """Set the `training` flag of this and descendent to true."""
+
+        def setTrain(mod: Module) -> None:
+            mod.training = True
+            for subModule in mod._modules.values():
+                setTrain(subModule)
+
+        setTrain(self)
 
     def eval(self) -> None:
-        """Set the mode of this module and all descendent modules to `eval`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        """Set the `training` flag of this and descendent to false."""
+
+        def setTrain(mod: Module) -> None:
+            mod.training = False
+            for subModule in mod._modules.values():
+                setTrain(subModule)
+
+        setTrain(self)
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -45,11 +57,23 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        raise NotImplementedError("Need to include this file from past assignment.")
+        data = dict()
+
+        def recursiveGetParams(accPref: str, mod: Module) -> None:
+            pref = "" if accPref == "" else accPref + "."
+            # store my params
+            for pName, pVal in mod._parameters.items():
+                data[pref + pName] = pVal
+            # store subModule's params
+            for subModName, subMod in mod._modules.items():
+                recursiveGetParams(pref + subModName, subMod)
+
+        recursiveGetParams("", self)
+        return [(k, v) for (k, v) in data.items()]
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        return [v for (k, v) in self.named_parameters()]
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
@@ -85,6 +109,7 @@ class Module:
         return None
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Allow a Module instance to be called as a function (to forward)"""
         return self.forward(*args, **kwargs)
 
     def __repr__(self) -> str:
