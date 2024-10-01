@@ -109,37 +109,40 @@ class All(Function):
 class Mul(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+        return t1.f.mul_zip(t1, t2)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output
+        (t1, t2) = ctx.saved_values
+        return grad_output, grad_output  # ?
 
 
 class Sigmoid(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
+        return t1.f.sigmoid_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output
+        (t1,) = ctx.saved_values
+        return grad_output  # ?
 
 
 class ReLU(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
+        return t1.f.relu_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output
+        (t1,) = ctx.saved_values
+        return grad_output.f.relu_back_zip(t1, grad_output)
 
 
 class Log(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
+        return t1.f.log_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
@@ -148,18 +151,18 @@ class Log(Function):
 
 class Exp(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
+        return t1.f.exp_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
 
 
-class Sum(Function):
+class sum(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2)
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
+        return t1.f.add_zip(t1)  # with dim arg but what type is it?
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
