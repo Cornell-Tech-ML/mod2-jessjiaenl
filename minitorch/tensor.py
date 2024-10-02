@@ -17,6 +17,18 @@ from .tensor_functions import (
     Inv,
     MatMul,
     Mul,
+    Add,
+    Sigmoid,
+    ReLU,
+    Log,
+    Exp,
+    Sum,
+    LT,
+    EQ,
+    IsClose,
+    Permute,
+    Neg,
+    View
 )
 
 if TYPE_CHECKING:
@@ -271,3 +283,63 @@ class Tensor:
 
     # Functions
     # TODO: Implement for Task 2.3.
+
+    def __add__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, b)
+
+    def __mul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self, b)
+
+    def __lt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(self, b)
+    
+    def __eq__(self, b: TensorLike) -> Tensor:
+        return EQ.apply(self, b)
+
+    def __gt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(b, self)
+
+    def __neg__(self) -> Tensor:
+        return Neg.apply(self)
+
+    def __radd__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, b)
+
+    def __rmul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self, b)
+
+    def log(self) -> Tensor:
+        """Apply log function to this tensor (defined in tensor_functions.py)"""
+        return Log.apply(self)
+
+    def sigmoid(self) -> Tensor:
+        """Apply sigmoid function to this tensor (defined in tensor_functions.py)"""
+        return Sigmoid.apply(self)
+
+    def relu(self) -> Tensor:
+        """Apply relu function to this scalar (defined in tensor_functions.py)"""
+        return ReLU.apply(self)
+
+    def exp(self) -> Tensor:
+        """Apply exp function to this tensor (defined in tensor_functions.py)"""
+        return Exp.apply(self)
+    
+    def is_close(self, b: TensorLike) -> bool:
+        return IsClose.apply(self, b)
+
+    # TODO: functions with additional dim argument
+    def sum(self, dim: Tensor) -> Tensor: # TODO: add dim argument
+        """Reduce sum function to this tensor (defined in tensor_functions.py)"""
+        return Sum.apply(self, dim)
+    
+    def mean(self, dim: Tensor) -> Tensor:
+        return
+    
+    def permute(self, dim: Tensor) -> Tensor:
+        return Permute.apply(self, dim)
+    
+    def view(self, dim: Tensor) -> Tensor:
+        return View.apply(self, dim)
+
+    def zero_grad_(self) -> None:
+        self.grad = None
