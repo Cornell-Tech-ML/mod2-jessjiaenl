@@ -169,12 +169,12 @@ class Exp(Function):
 class Sum(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
-        ctx.save_for_backward(t1)
-        return t1.f.add_zip(t1) # TODO: with dim arg but what type is it?
-
+        return t1.f.add_reduce(t1, int(dim.item())) # item extracts the val in the 1x1 tensor
+        
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output # TODO what?
+        """returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
+        return grad_output, 0,0 # grad w.r.t dim is just 0
 
 
 class LT(Function):
@@ -186,7 +186,7 @@ class LT(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         (t1,) = ctx.saved_values
-        return t1.zeros(), t1.zeros() # TODO: two zero tensors
+        return t1.zeros(t1.shape), t1.zeros(t1.shape)
 
 
 class EQ(Function):
@@ -198,23 +198,25 @@ class EQ(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         (t1,) = ctx.saved_values
-        return t1.zeros(), t1.zeros() # TODO: two zero tensors zeros(shape)
+        return t1.zeros(t1.shape), t1.zeros(t1.shape)
 
 
 class IsClose(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
-        return t1.f.add_zip(t1, t2) # TODO
+        return t1.f.is_close_zip(t1, t2)
 
 
 class Permute(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
-        return t1.permute() # TODO: add arg
+        ctx.save_for_backward(dim)
+        return t1.permute() # TODO: arg = int list
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output # TODO
+        (dim,) = ctx.saved_values
+        return grad_output, grad_output # TODO: reversely permute the grad_output
 
 
 class View(Function):

@@ -325,20 +325,35 @@ class Tensor:
         return Exp.apply(self)
     
     def is_close(self, b: TensorLike) -> bool:
+        """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
         return IsClose.apply(self, b)
 
-    # TODO: functions with additional dim argument
-    def sum(self, dim: Tensor) -> Tensor: # TODO: add dim argument
+    # TODO: functions with OPTIONAL dim argument
+    def sum(self, dim: Optional[Tensor] = None) -> Tensor:
         """Reduce sum function to this tensor (defined in tensor_functions.py)"""
+        # TODO: if no dim then sum all
+        # for dim in all dims apply reduce on the resulting tensor
         return Sum.apply(self, dim)
     
-    def mean(self, dim: Tensor) -> Tensor:
-        return
+    def mean(self, dim: Optional[Tensor] = None) -> Tensor:
+        """Reduce sum on the dimension, divided by the size of tensor in that dimension"""
+        # if no dim the mean of all sum everything and divide by size
+        if dim == None:
+            return Mul.apply(self.sum(), Inv.apply(self.size))
+        return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim])) #TODO:?
     
-    def permute(self, dim: Tensor) -> Tensor:
+    def permute(self, dim: Optional[Tensor] = None) -> Tensor:
+        """Permute this tensor according to the specified dimensions"""
+        # TODO: if no dim then?
+        if dim == None:
+            return Copy.apply(self)
         return Permute.apply(self, dim)
     
-    def view(self, dim: Tensor) -> Tensor:
+    def view(self, dim: Optional[Tensor] = None) -> Tensor:
+        """View the tensor as described in dim"""
+        # TODO: if no dim then return copy of self?
+        if dim == None:
+            return Copy.apply(self)
         return View.apply(self, dim)
 
     def zero_grad_(self) -> None:
