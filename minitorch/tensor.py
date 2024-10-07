@@ -330,15 +330,13 @@ class Tensor:
 
     # TODO: functions with OPTIONAL dim argument
     def sum(self, dim: Optional[Tensor] = None) -> Tensor:
-        """Reduce sum function to this tensor (defined in tensor_functions.py)"""
-        # TODO: if no dim then sum all
-        if dim == None:
+        """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
+        if dim == None: # TODO: verify
             Sum.apply(self.contiguous().view(self._ensure_tensor(self.size)), self._ensure_tensor(0))
         return Sum.apply(self, dim)
     
     def mean(self, dim: Optional[Tensor] = None) -> Tensor:
-        """Reduce sum on the dimension, divided by the size of tensor in that dimension"""
-        # if no dim the mean of all sum everything and divide by size
+        """Reduce sum on dim, divided by the size of tensor in that dim, or return mean of whole tensor"""
         if dim == None:
             return Mul.apply(self.sum(), Inv.apply(self.size))
         return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim]))
