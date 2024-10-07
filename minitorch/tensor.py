@@ -332,7 +332,8 @@ class Tensor:
     def sum(self, dim: Optional[Tensor] = None) -> Tensor:
         """Reduce sum function to this tensor (defined in tensor_functions.py)"""
         # TODO: if no dim then sum all
-        # for dim in all dims apply reduce on the resulting tensor
+        if dim == None:
+            Sum.apply(self.contiguous().view(self._ensure_tensor(self.size)), self._ensure_tensor(0))
         return Sum.apply(self, dim)
     
     def mean(self, dim: Optional[Tensor] = None) -> Tensor:
@@ -340,18 +341,18 @@ class Tensor:
         # if no dim the mean of all sum everything and divide by size
         if dim == None:
             return Mul.apply(self.sum(), Inv.apply(self.size))
-        return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim])) #TODO:?
+        return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim]))
     
     def permute(self, dim: Optional[Tensor] = None) -> Tensor:
         """Permute this tensor according to the specified dimensions"""
-        # TODO: if no dim then?
+        # if no dim then return a copy of self without permuting
         if dim == None:
             return Copy.apply(self)
         return Permute.apply(self, dim)
     
     def view(self, dim: Optional[Tensor] = None) -> Tensor:
         """View the tensor as described in dim"""
-        # TODO: if no dim then return copy of self?
+        # if no dim then return copy of self?
         if dim == None:
             return Copy.apply(self)
         return View.apply(self, dim)
