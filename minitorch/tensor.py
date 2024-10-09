@@ -359,11 +359,11 @@ class Tensor:
         return Exp.apply(self)
     
 
-    # TODO: functions with OPTIONAL dim argument: what are the types of dim
+    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py
     def sum(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
         if dim == None:
-            return Sum.apply(self, dim) # TODO: should we make Sum's dim arg also optional
+            return Sum.apply(self, dim)
         return Sum.apply(self, self._ensure_tensor(dim))
     
     def mean(self, dim: Optional[int] = None) -> Tensor:
