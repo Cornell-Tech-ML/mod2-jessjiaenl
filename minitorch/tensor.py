@@ -28,7 +28,8 @@ from .tensor_functions import (
     IsClose,
     Permute,
     Neg,
-    View
+    View,
+    All
 )
 
 if TYPE_CHECKING:
@@ -301,32 +302,41 @@ class Tensor:
         return self._tensor.dims
 
     def __add__(self, b: TensorLike) -> Tensor:
-        return Add.apply(self, b)
+        return Add.apply(self, self._ensure_tensor(b))
+    
+    def __sub__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, -self._ensure_tensor(b))
 
     def __mul__(self, b: TensorLike) -> Tensor:
-        return Mul.apply(self, b)
+        return Mul.apply(self, self._ensure_tensor(b))
 
     def __lt__(self, b: TensorLike) -> Tensor:
-        return LT.apply(self, b)
+        return LT.apply(self, self._ensure_tensor(b))
     
     def __eq__(self, b: TensorLike) -> Tensor:
-        return EQ.apply(self, b)
+        return EQ.apply(self, self._ensure_tensor(b))
 
     def __gt__(self, b: TensorLike) -> Tensor:
-        return LT.apply(b, self)
+        return LT.apply(self._ensure_tensor(b), self)
 
     def __neg__(self) -> Tensor:
         return Neg.apply(self)
 
     def __radd__(self, b: TensorLike) -> Tensor:
-        return Add.apply(self, b)
+        return Add.apply(self, self._ensure_tensor(b))
 
     def __rmul__(self, b: TensorLike) -> Tensor:
-        return Mul.apply(self, b)
+        return Mul.apply(self, self._ensure_tensor(b))
+    
+    # TODO: All in tensor_functions.py take in extra dimensions, should we also do that here?
+    def all(self, dim: Optional[Tensor] = None) -> Tensor:
+        if dim == None:
+            return All.apply(self)
+        return All.apply(self, Tensor.make([dim], (1,), backend=self.backend))
 
-    def log(self) -> Tensor:
-        """Apply log function to this tensor (defined in tensor_functions.py)"""
-        return Log.apply(self)
+    def is_close(self, b: TensorLike) -> bool:
+        """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
+        return IsClose.apply(self, b)
 
     def sigmoid(self) -> Tensor:
         """Apply sigmoid function to this tensor (defined in tensor_functions.py)"""
@@ -335,14 +345,15 @@ class Tensor:
     def relu(self) -> Tensor:
         """Apply relu function to this scalar (defined in tensor_functions.py)"""
         return ReLU.apply(self)
+    
+    def log(self) -> Tensor:
+        """Apply log function to this tensor (defined in tensor_functions.py)"""
+        return Log.apply(self)
 
     def exp(self) -> Tensor:
         """Apply exp function to this tensor (defined in tensor_functions.py)"""
         return Exp.apply(self)
     
-    def is_close(self, b: TensorLike) -> bool:
-        """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
-        return IsClose.apply(self, b)
 
     # TODO: functions with OPTIONAL dim argument
     def sum(self, dim: Optional[Tensor] = None) -> Tensor:
