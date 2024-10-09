@@ -13,24 +13,24 @@ from .tensor_data import TensorData
 
 # Comment these out if not yet implemented
 from .tensor_functions import (
-    EQ,
-    LT,
-    Add,
-    All,
     Copy,
-    Exp,
     Inv,
-    IsClose,
-    Log,
     MatMul,
     Mul,
-    Neg,
-    Permute,
-    ReLU,
+    Add,
     Sigmoid,
+    ReLU,
+    Log,
+    Exp,
     Sum,
+    LT,
+    EQ,
+    IsClose,
+    Permute,
+    Neg,
     View,
-    tensor,
+    All,
+    tensor
 )
 
 if TYPE_CHECKING:
@@ -285,3 +285,98 @@ class Tensor:
 
     # Functions
     # TODO: Implement for Task 2.3.
+
+    @property
+    def size(self) -> int:
+        """Returns
+        size of the tensor
+
+        """
+        return self._tensor.size
+    
+    @property
+    def dims(self) -> int:
+        """Returns
+        number of dimensions of the tensor
+
+        """
+        return self._tensor.dims
+
+    def __add__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, self._ensure_tensor(b))
+    
+    def __sub__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, -self._ensure_tensor(b))
+
+    def __mul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self, self._ensure_tensor(b))
+
+    def __lt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(self, self._ensure_tensor(b))
+    
+    def __eq__(self, b: TensorLike) -> Tensor:
+        return EQ.apply(self, self._ensure_tensor(b))
+
+    def __gt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(self._ensure_tensor(b), self)
+
+    def __neg__(self) -> Tensor:
+        return Neg.apply(self)
+
+    def __radd__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, self._ensure_tensor(b))
+
+    def __rmul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self, self._ensure_tensor(b))
+
+    def is_close(self, b: TensorLike) -> bool:
+        """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
+        return IsClose.apply(self, b)
+
+    def sigmoid(self) -> Tensor:
+        """Apply sigmoid function to this tensor (defined in tensor_functions.py)"""
+        return Sigmoid.apply(self)
+
+    def relu(self) -> Tensor:
+        """Apply relu function to this scalar (defined in tensor_functions.py)"""
+        return ReLU.apply(self)
+    
+    def log(self) -> Tensor:
+        """Apply log function to this tensor (defined in tensor_functions.py)"""
+        return Log.apply(self)
+
+    def exp(self) -> Tensor:
+        """Apply exp function to this tensor (defined in tensor_functions.py)"""
+        return Exp.apply(self)
+    
+
+    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py    
+    def all(self, dim: Optional[int] = None) -> Tensor:
+        if dim == None:
+            return All.apply(self, dim) # TODO: All's dim is not an optional arg, is it ok?
+        return All.apply(self, self._ensure_tensor(dim))
+
+    def sum(self, dim: Optional[int] = None) -> Tensor:
+        """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
+        if dim == None:
+            return Sum.apply(self, dim)
+        return Sum.apply(self, self._ensure_tensor(dim))
+    
+    def mean(self, dim: Optional[int] = None) -> Tensor:
+        """Reduce sum on dim, divided by the size of tensor in that dim, or return mean of whole tensor"""
+        if dim == None:
+            return Mul.apply(self.sum(), Inv.apply(self.size))
+        return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim]))
+    
+    def permute(self, *newdim: int) -> Tensor:
+        """Permute this tensor according to the specified new dimensions"""
+        # permute is called in test_tensors in arbitrary number of int, unpack, make it a tensor
+        return Permute.apply(self, tensor(list(newdim)))
+    
+    def view(self, *newdim: int) -> Tensor:
+        """View the tensor as described in new dimensions"""
+        # view is called in test_tensors in arbitrary number of int, unpack, make it a tensor
+        return View.apply(self, tensor(list(newdim)))
+
+    def zero_grad_(self) -> None:
+        self.grad = None
