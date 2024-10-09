@@ -284,6 +284,22 @@ class Tensor:
     # Functions
     # TODO: Implement for Task 2.3.
 
+    @property
+    def size(self) -> int:
+        """Returns
+        size of the tensor
+
+        """
+        return self._tensor.size
+    
+    @property
+    def dims(self) -> int:
+        """Returns
+        number of dimensions of the tensor
+
+        """
+        return self._tensor.dims
+
     def __add__(self, b: TensorLike) -> Tensor:
         return Add.apply(self, b)
 
