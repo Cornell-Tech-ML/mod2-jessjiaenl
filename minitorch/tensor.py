@@ -29,7 +29,8 @@ from .tensor_functions import (
     Permute,
     Neg,
     View,
-    All
+    All,
+    tensor
 )
 
 if TYPE_CHECKING:
@@ -329,10 +330,13 @@ class Tensor:
         return Mul.apply(self, self._ensure_tensor(b))
     
     # TODO: All in tensor_functions.py take in extra dimensions, should we also do that here?
-    def all(self, dim: Optional[Tensor] = None) -> Tensor:
-        if dim == None:
-            return All.apply(self)
-        return All.apply(self, Tensor.make([dim], (1,), backend=self.backend))
+    def all(self) -> Tensor:
+        return All.apply(self) # TODO: All's dim is not an optional arg, is it ok?
+    
+    # def all(self, dim: Optional[int] = None) -> Tensor:
+    #     if dim == None:
+    #         return All.apply(self) # TODO: All's dim is not an optional arg, is it ok?
+    #     return All.apply(self, self._ensure_tensor(dim))
 
     def is_close(self, b: TensorLike) -> bool:
         """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
@@ -355,32 +359,28 @@ class Tensor:
         return Exp.apply(self)
     
 
-    # TODO: functions with OPTIONAL dim argument
-    def sum(self, dim: Optional[Tensor] = None) -> Tensor:
+    # TODO: functions with OPTIONAL dim argument: what are the types of dim
+    def sum(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
-        if dim == None: # TODO: verify
-            Sum.apply(self.contiguous().view(self._ensure_tensor(self.size)), self._ensure_tensor(0))
-        return Sum.apply(self, dim)
+        if dim == None:
+            return Sum.apply(self, dim) # TODO: should we make Sum's dim arg also optional
+        return Sum.apply(self, self._ensure_tensor(dim))
     
-    def mean(self, dim: Optional[Tensor] = None) -> Tensor:
+    def mean(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum on dim, divided by the size of tensor in that dim, or return mean of whole tensor"""
         if dim == None:
             return Mul.apply(self.sum(), Inv.apply(self.size))
         return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim]))
     
-    def permute(self, dim: Optional[Tensor] = None) -> Tensor:
-        """Permute this tensor according to the specified dimensions"""
-        # if no dim then return a copy of self without permuting
-        if dim == None:
-            return Copy.apply(self)
-        return Permute.apply(self, dim)
+    def permute(self, *newdim: int) -> Tensor:
+        """Permute this tensor according to the specified new dimensions"""
+        # permute is called in test_tensors in arbitrary number of int, unpack, make it a tensor
+        return Permute.apply(self, tensor(list(newdim)))
     
-    def view(self, dim: Optional[Tensor] = None) -> Tensor:
-        """View the tensor as described in dim"""
-        # if no dim then return copy of self?
-        if dim == None:
-            return Copy.apply(self)
-        return View.apply(self, dim)
+    def view(self, *newdim: int) -> Tensor:
+        """View the tensor as described in new dimensions"""
+        # view is called in test_tensors in arbitrary number of int, unpack, make it a tensor
+        return View.apply(self, tensor(list(newdim)))
 
     def zero_grad_(self) -> None:
         self.grad = None

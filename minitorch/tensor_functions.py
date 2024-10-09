@@ -169,7 +169,10 @@ class Exp(Function):
 class Sum(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
-        return t1.f.add_reduce(t1, int(dim.item())) # item extracts the val in the 1x1 tensor
+        if dim is not None:
+            return t1.f.add_reduce(t1, int(dim.item())) # item extracts the val in the 1x1 tensor
+        else:
+            return t1.f.add_reduce(t1.contiguous().view(int(operators.prod(t1.shape))), 0)
         
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
