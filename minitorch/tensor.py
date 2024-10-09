@@ -328,15 +328,6 @@ class Tensor:
 
     def __rmul__(self, b: TensorLike) -> Tensor:
         return Mul.apply(self, self._ensure_tensor(b))
-    
-    # TODO: All in tensor_functions.py take in extra dimensions, should we also do that here?
-    def all(self) -> Tensor:
-        return All.apply(self) # TODO: All's dim is not an optional arg, is it ok?
-    
-    # def all(self, dim: Optional[int] = None) -> Tensor:
-    #     if dim == None:
-    #         return All.apply(self) # TODO: All's dim is not an optional arg, is it ok?
-    #     return All.apply(self, self._ensure_tensor(dim))
 
     def is_close(self, b: TensorLike) -> bool:
         """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
@@ -359,7 +350,12 @@ class Tensor:
         return Exp.apply(self)
     
 
-    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py
+    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py    
+    def all(self, dim: Optional[int] = None) -> Tensor:
+        if dim == None:
+            return All.apply(self, dim) # TODO: All's dim is not an optional arg, is it ok?
+        return All.apply(self, self._ensure_tensor(dim))
+
     def sum(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
         if dim == None:
