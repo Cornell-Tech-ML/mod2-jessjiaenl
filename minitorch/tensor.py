@@ -95,9 +95,11 @@ class Tensor:
         self.f = backend
 
     def requires_grad_(self, x: bool) -> None:
+        """Creates a history to store function operations on the tensor"""
         self.history = History()
 
     def requires_grad(self) -> bool:
+        """Return whehter or not the current tensor has a history i.e. requires gradiant"""
         return self.history is not None
 
     def to_numpy(self) -> npt.NDArray[np.float64]:
@@ -194,6 +196,7 @@ class Tensor:
         # END CODE CHANGE (2021)
 
     def zeros(self, shape: Optional[UserShape] = None) -> Tensor:
+        """Create an all zero tensor of shape 'shape'"""
         def zero(shape: UserShape) -> Tensor:
             return Tensor.make(
                 [0.0] * int(operators.prod(shape)), shape, backend=self.backend
@@ -239,14 +242,23 @@ class Tensor:
         return self.history is not None and self.history.last_fn is None
 
     def is_constant(self) -> bool:
+        """True if this tensor is constant i.e. doesn't require grad i.e. no history"""
         return self.history is None
 
     @property
     def parents(self) -> Iterable[Variable]:
+        """Return the list of parent tensors"""
         assert self.history is not None
         return self.history.inputs
 
     def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]:
+        """Applies the chain rule to the previously applied function
+
+        Args:
+        ----
+            d_output : gradient that was passed on
+
+        """
         h = self.history
         assert h is not None
         assert h.last_fn is not None
@@ -260,6 +272,13 @@ class Tensor:
         ]
 
     def backward(self, grad_output: Optional[Tensor] = None) -> None:
+        """Calls autodiff to fill in the gradiant for the history of this object.
+
+        Args:
+        ----
+            d_output (tensor, opt): starting derivative to backpropagate through the model
+
+        """
         if grad_output is None:
             assert self.shape == (1,), "Must provide grad_output if non-scalar"
             grad_output = Tensor.make([1.0], (1,), backend=self.backend)
@@ -349,18 +368,19 @@ class Tensor:
         """Apply exp function to this tensor (defined in tensor_functions.py)"""
         return Exp.apply(self)
 
-    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py
+    # functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py
     def all(self, dim: Optional[int] = None) -> Tensor:
-        if dim == None:
+        """Return 1 if al are true"""
+        if dim is None:
             return All.apply(
                 self.contiguous().view(int(operators.prod(self.shape))),
                 self._ensure_tensor(0),
-            )  # TODO: All's dim is not an optional arg, is it ok?
-        return All.apply(self, dim)
+            )
+        return All.apply(self, self._ensure_tensor(dim))
 
     def sum(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
-        if dim == None:
+        if dim is None:
             return Sum.apply(
                 self.contiguous().view(int(operators.prod(self.shape))),
                 self._ensure_tensor(0),
@@ -369,7 +389,7 @@ class Tensor:
 
     def mean(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum on dim, divided by the size of tensor in that dim, or return mean of whole tensor"""
-        if dim == None:
+        if dim is None:
             return Mul.apply(self.sum(), Inv.apply(self._ensure_tensor(self.size)))
         return Mul.apply(self.sum(dim), Inv.apply(self._ensure_tensor(self.shape[dim])))
 
@@ -384,4 +404,5 @@ class Tensor:
         return View.apply(self, tensor(list(newdim)))
 
     def zero_grad_(self) -> None:
+        """Reset the gradient of this tensor to None"""
         self.grad = None
