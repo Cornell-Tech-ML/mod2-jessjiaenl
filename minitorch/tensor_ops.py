@@ -283,7 +283,6 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
         # at each index of big, get small index, map, and store
         for ordinal in range(len(out)):
             out_index = np.zeros(len(out_shape), dtype=np.int32)
@@ -340,7 +339,6 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
         # at each index of big (out), get small (a b) index, zip, and store
         for ordinal in range(len(out)):
             out_index = np.zeros(len(out_shape), dtype=np.int32)
@@ -388,7 +386,6 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 2.3.
         # for each cell in out, we reduce the group of a_shape[reduce_dim] cells into one value, store it
 
         # so we go through all cells in a

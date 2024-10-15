@@ -46,7 +46,6 @@ def index_to_position(index: Index, strides: Strides) -> int:
         Position in storage
 
     """
-    # TODO: Implement for Task 2.1.
     res = 0
     for i, j in zip(index, strides):
         res += i * j
@@ -66,10 +65,11 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    # TODO: Implement for Task 2.1.
     # 1D array, each elem = ordinal // stride[i] and cont with ordinal % stride[i]
 
-    stride = strides_from_shape(shape)
+    stride = strides_from_shape(
+        list(map(int, shape))
+    )  # convert type Shape to UserShape
     for i in range(len(stride)):
         out_index[i] = ordinal // stride[i]
         ordinal %= stride[i]
@@ -96,7 +96,6 @@ def broadcast_index(
         None
 
     """
-    # TODO: Implement for Task 2.2.
     # after broadcasting small to big and try to edit big, want to find corres index in small
 
     # if dim(big) > dim(small), they must align from the right cuz we could only have added dim on left of small
@@ -131,7 +130,6 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
         IndexingError : if cannot broadcast
 
     """
-    # TODO: Implement for Task 2.2.
     # make sure dim1 <= dim2
     shape1_list, shape2_list = list(shape1), list(shape2)
     if len(shape1_list) > len(shape2_list):
@@ -290,7 +288,6 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        # TODO: Implement for Task 2.1.
         """
             Note:
             _strides: Strides, array(strides)

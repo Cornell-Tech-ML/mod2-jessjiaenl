@@ -308,7 +308,6 @@ class Tensor:
         return self._tensor.shape
 
     # Functions
-    # TODO: Implement for Task 2.3.
 
     @property
     def size(self) -> int:
@@ -353,7 +352,7 @@ class Tensor:
     def __rmul__(self, b: TensorLike) -> Tensor:
         return Mul.apply(self, self._ensure_tensor(b))
 
-    def is_close(self, b: TensorLike) -> bool:
+    def is_close(self, b: Tensor) -> Tensor:
         """Apply is xlose function to this tensor and b (defined in tensor_functions.py)"""
         return IsClose.apply(self, b)
 

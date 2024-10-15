@@ -112,7 +112,6 @@ class All(Function):
         #     return a.f.mul_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
 
 
-# TODO: Implement for Task 2.3.
 class Mul(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -137,7 +136,7 @@ class Sigmoid(Function):
         return t1.f.sigmoid_map(t1)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Return gradient of sigmoid evaluated at input stored in ctx multiplied by accumulated gradient grad_output"""
         (t1,) = ctx.saved_values
         return grad_output.f.sigmoid_back_zip(t1, grad_output)
@@ -151,7 +150,7 @@ class ReLU(Function):
         return t1.f.relu_map(t1)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Return the gradient of ReLU evaluated at input stored in ctx multiplied by accumulated gradient grad_output"""
         (t1,) = ctx.saved_values
         return grad_output.f.relu_back_zip(t1, grad_output)
@@ -165,7 +164,7 @@ class Log(Function):
         return t1.f.log_map(t1)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Return the gradient of log evaluated at input stored in ctx multiplied by accumulated gradient grad_output"""
         (t1,) = ctx.saved_values
         return grad_output.f.log_back_zip(t1, grad_output)
@@ -179,7 +178,7 @@ class Exp(Function):
         return t1.f.exp_map(t1)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Return the gradient of exp evaluated at input stored in ctx multiplied by accumulated gradient grad_output"""
         (t1,) = ctx.saved_values
         return grad_output.f.mul_zip(t1.f.exp_map(t1), grad_output)
@@ -198,7 +197,9 @@ class Sum(Function):
         #     return t1.f.add_reduce(t1.contiguous().view(int(operators.prod(t1.shape))), 0)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(
+        ctx: Context, grad_output: Tensor
+    ) -> Tuple[Tensor, float]:  # same return type as View
         """Returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
         return (
             grad_output,
@@ -252,7 +253,9 @@ class Permute(Function):
         )  # create new tensor with tensordata return by permute
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(
+        ctx: Context, grad_output: Tensor
+    ) -> Tuple[Tensor, float]:  # same return type as View
         """Reversely permute the gradient"""
         (dim,) = ctx.saved_values
         dim_list = list(
