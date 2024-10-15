@@ -126,7 +126,7 @@ class Mul(Function):
         (t1, t2) = ctx.saved_values
         return grad_output.f.mul_zip(t2, grad_output), grad_output.f.mul_zip(
             t1, grad_output
-        )  # ?
+        )
 
 
 class Sigmoid(Function):
@@ -200,11 +200,7 @@ class Sum(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         """Returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
-        return (
-            grad_output,
-            0,
-            0,
-        )  # grad for each cell is just 1*grad, grad w.r.t dim is just 0
+        return grad_output, 0.0 # grad for each cell is just 1*grad, grad w.r.t dim is just 0
 
 
 class LT(Function):
