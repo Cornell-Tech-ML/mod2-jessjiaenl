@@ -286,10 +286,10 @@ def tensor_map(
         # TODO: Implement for Task 2.3.
         # at each index of big, get small index, map, and store
         for ordinal in range(len(out)):
-            out_index = np.zeros(len(out_shape))
+            out_index = np.zeros(len(out_shape), dtype=np.int32)
             to_index(ordinal, out_shape, out_index)
 
-            in_index = np.zeros(len(in_shape))
+            in_index = np.zeros(len(in_shape), dtype=np.int32)
             broadcast_index(out_index, out_shape, in_shape, in_index)
 
             out[ordinal] = fn(in_storage[index_to_position(in_index, in_strides)])
@@ -343,12 +343,12 @@ def tensor_zip(
         # TODO: Implement for Task 2.3.
         # at each index of big (out), get small (a b) index, zip, and store
         for ordinal in range(len(out)):
-            out_index = np.zeros(len(out_shape))
+            out_index = np.zeros(len(out_shape), dtype=np.int32)
             to_index(ordinal, out_shape, out_index)
 
-            a_index = np.zeros(len(a_shape))
+            a_index = np.zeros(len(a_shape), dtype=np.int32)
             broadcast_index(out_index, out_shape, a_shape, a_index)
-            b_index = np.zeros(len(b_shape))
+            b_index = np.zeros(len(b_shape), dtype=np.int32)
             broadcast_index(out_index, out_shape, b_shape, b_index)
 
             out[ordinal] = fn(
@@ -393,10 +393,10 @@ def tensor_reduce(
 
         # so we go through all cells in a
         for i in range(len(a_storage)):
-            a_index = np.zeros(len(a_shape))
+            a_index = np.zeros(len(a_shape), dtype=np.int32)
             to_index(i, a_shape, a_index)
             # identify which group it belongs (i.e. broadcast the index)
-            out_index = np.zeros(len(out_shape))
+            out_index = np.zeros(len(out_shape), dtype=np.int32)
             broadcast_index(a_index, a_shape, out_shape, out_index)
             # update out val by fn(old, it)
             out[index_to_position(out_index, out_strides)] = fn(
