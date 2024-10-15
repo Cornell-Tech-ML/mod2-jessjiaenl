@@ -111,6 +111,7 @@ def relu_back(x: float, y: float) -> float:
     """Computes the derivative of ReLU(x) times y"""
     return y if x >= 0 else 0.0
 
+
 def sigmoid_back(x: float, y: float) -> float:
     """Computes the derivative of sigmoid times y"""
     return mul(mul(sigmoid(x), add(1, neg(sigmoid(x)))), y)

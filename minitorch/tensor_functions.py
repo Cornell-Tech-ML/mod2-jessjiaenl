@@ -200,7 +200,10 @@ class Sum(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         """Returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
-        return grad_output, 0.0 # grad for each cell is just 1*grad, grad w.r.t dim is just 0
+        return (
+            grad_output,
+            0.0,
+        )  # grad for each cell is just 1*grad, grad w.r.t dim is just 0
 
 
 class LT(Function):
@@ -243,13 +246,23 @@ class Permute(Function):
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
         """Permute t1 according to the reorder specified in dim"""
         ctx.save_for_backward(dim)
-        return t1.permute(dim._tensor._storage)  # TODO: arg = int list
+        int_dim = list(map(int, dim._tensor._storage))  # make numpy arr to int list
+        return t1._new(
+            t1._tensor.permute(*int_dim)
+        )  # create new tensor with tensordata return by permute
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         """Reversely permute the gradient"""
         (dim,) = ctx.saved_values
-        return grad_output, grad_output  # TODO: reversely permute the grad_output
+        dim_list = list(
+            map(int, dim._tensor._storage)
+        )  # make tensor storage an int list
+        rev_list = [dim_list[i] for i in range(len(dim_list))]
+        for i in range(len(dim_list)):
+            if i != dim_list[i]:
+                rev_list[dim_list[i]] = i
+        return grad_output.permute(*rev_list), 0.0
 
 
 class View(Function):
