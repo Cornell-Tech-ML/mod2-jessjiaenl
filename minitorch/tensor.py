@@ -197,6 +197,7 @@ class Tensor:
 
     def zeros(self, shape: Optional[UserShape] = None) -> Tensor:
         """Create an all zero tensor of shape 'shape'"""
+
         def zero(shape: UserShape) -> Tensor:
             return Tensor.make(
                 [0.0] * int(operators.prod(shape)), shape, backend=self.backend
@@ -277,6 +278,10 @@ class Tensor:
         Args:
         ----
             d_output (tensor, opt): starting derivative to backpropagate through the model
+
+        Returns:
+        -------
+            None: Calls backpropagate.
 
         """
         if grad_output is None:
