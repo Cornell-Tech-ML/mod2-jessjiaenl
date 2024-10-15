@@ -98,11 +98,12 @@ class Add(Function):
 class All(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Tensor) -> Tensor:
-        """Return 1 if all are true"""
-        if dim is not None:
-            return a.f.mul_reduce(a, int(dim.item()))
-        else:
-            return a.f.mul_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
+        """Return 1 if all are true, let all deal with dim == None like sum does"""
+        return a.f.mul_reduce(a, int(dim.item()))
+        # if dim is not None:
+        #     return a.f.mul_reduce(a, int(dim.item()))
+        # else:
+        #     return a.f.mul_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
 
 
 # TODO: Implement for Task 2.3.
@@ -115,7 +116,9 @@ class Mul(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         (t1, t2) = ctx.saved_values
-        return grad_output.f.mul_zip(t2, grad_output), grad_output.f.mul_zip(t1, grad_output)  # ?
+        return grad_output.f.mul_zip(t2, grad_output), grad_output.f.mul_zip(
+            t1, grad_output
+        )  # ?
 
 
 class Sigmoid(Function):
@@ -169,15 +172,23 @@ class Exp(Function):
 class Sum(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
-        if dim is not None:
-            return t1.f.add_reduce(t1, int(dim.item())) # item extracts the val in the 1x1 tensor
-        else:
-            return t1.f.add_reduce(t1.contiguous().view(int(operators.prod(t1.shape))), 0)
-        
+        """Let sum deal with dim being None"""
+        return t1.f.add_reduce(
+            t1, int(dim.item())
+        )  # item extracts the val in the 1x1 tensor
+        # if dim is not None:
+        #     return t1.f.add_reduce(t1, int(dim.item())) # item extracts the val in the 1x1 tensor
+        # else:
+        #     return t1.f.add_reduce(t1.contiguous().view(int(operators.prod(t1.shape))), 0)
+
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        """returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
-        return grad_output, 0,0 # grad w.r.t dim is just 0
+        """Returns grad_output 'broadcasted to the original input size' but broadcast is done lazily so just return grad_output"""
+        return (
+            grad_output,
+            0,
+            0,
+        )  # grad for each cell is just 1*grad, grad w.r.t dim is just 0
 
 
 class LT(Function):
@@ -214,12 +225,12 @@ class Permute(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
         ctx.save_for_backward(dim)
-        return t1.permute() # TODO: arg = int list
+        return t1.permute(dim._tensor._storage)  # TODO: arg = int list
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         (dim,) = ctx.saved_values
-        return grad_output, grad_output # TODO: reversely permute the grad_output
+        return grad_output, grad_output  # TODO: reversely permute the grad_output
 
 
 class View(Function):

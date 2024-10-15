@@ -30,7 +30,7 @@ from .tensor_functions import (
     Neg,
     View,
     All,
-    tensor
+    tensor,
 )
 
 if TYPE_CHECKING:
@@ -293,7 +293,7 @@ class Tensor:
 
         """
         return self._tensor.size
-    
+
     @property
     def dims(self) -> int:
         """Returns
@@ -304,7 +304,7 @@ class Tensor:
 
     def __add__(self, b: TensorLike) -> Tensor:
         return Add.apply(self, self._ensure_tensor(b))
-    
+
     def __sub__(self, b: TensorLike) -> Tensor:
         return Add.apply(self, -self._ensure_tensor(b))
 
@@ -313,7 +313,7 @@ class Tensor:
 
     def __lt__(self, b: TensorLike) -> Tensor:
         return LT.apply(self, self._ensure_tensor(b))
-    
+
     def __eq__(self, b: TensorLike) -> Tensor:
         return EQ.apply(self, self._ensure_tensor(b))
 
@@ -340,7 +340,7 @@ class Tensor:
     def relu(self) -> Tensor:
         """Apply relu function to this scalar (defined in tensor_functions.py)"""
         return ReLU.apply(self)
-    
+
     def log(self) -> Tensor:
         """Apply log function to this tensor (defined in tensor_functions.py)"""
         return Log.apply(self)
@@ -348,31 +348,36 @@ class Tensor:
     def exp(self) -> Tensor:
         """Apply exp function to this tensor (defined in tensor_functions.py)"""
         return Exp.apply(self)
-    
 
-    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py    
+    # TODO: functions with OPTIONAL dim argument: types are determined with calls in test_tensor.py
     def all(self, dim: Optional[int] = None) -> Tensor:
         if dim == None:
-            return All.apply(self, dim) # TODO: All's dim is not an optional arg, is it ok?
-        return All.apply(self, self._ensure_tensor(dim))
+            return All.apply(
+                self.contiguous().view(int(operators.prod(self.shape))),
+                self._ensure_tensor(0),
+            )  # TODO: All's dim is not an optional arg, is it ok?
+        return All.apply(self, dim)
 
     def sum(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum function to this tensor on dimension dim, or the whole tensor (defined in tensor_functions.py)"""
         if dim == None:
-            return Sum.apply(self, dim)
+            return Sum.apply(
+                self.contiguous().view(int(operators.prod(self.shape))),
+                self._ensure_tensor(0),
+            )
         return Sum.apply(self, self._ensure_tensor(dim))
-    
+
     def mean(self, dim: Optional[int] = None) -> Tensor:
         """Reduce sum on dim, divided by the size of tensor in that dim, or return mean of whole tensor"""
         if dim == None:
-            return Mul.apply(self.sum(), Inv.apply(self.size))
-        return Mul.apply(self.sum(dim), Inv.apply(self.shape[dim]))
-    
+            return Mul.apply(self.sum(), Inv.apply(self._ensure_tensor(self.size)))
+        return Mul.apply(self.sum(dim), Inv.apply(self._ensure_tensor(self.shape[dim])))
+
     def permute(self, *newdim: int) -> Tensor:
         """Permute this tensor according to the specified new dimensions"""
         # permute is called in test_tensors in arbitrary number of int, unpack, make it a tensor
         return Permute.apply(self, tensor(list(newdim)))
-    
+
     def view(self, *newdim: int) -> Tensor:
         """View the tensor as described in new dimensions"""
         # view is called in test_tensors in arbitrary number of int, unpack, make it a tensor
