@@ -39,7 +39,7 @@ class Linear(minitorch.Module):
         # type Parameter .value is the tensor
         # inputs = list of tensors, each representing a data point initially
         # return self.weights.value * inputs + self.bias.value
-        
+
         # initially call fwd on dataset which has shape (num_pts, 2) = (num_pts, in_size) for first layer
         num_pts, in_size = inputs.shape
         # first layer weight has shape (in_size, out_size) = (2, hidden_layers)
@@ -48,7 +48,7 @@ class Linear(minitorch.Module):
         # result is (num_pts, out_size), i.e. one output for each datapoint
 
         return matix_mul + self.bias.value.view(1, self.out_size)
-    
+
 
 
 def default_log_fn(epoch, total_loss, correct, losses):

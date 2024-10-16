@@ -69,12 +69,12 @@ def max(x: float, y: float) -> float:
 
 def is_close(x: float, y: float) -> float:
     """Returns 1 iff x and y have a difference within 1e-2"""
-    return 1 if abs(x - y) < 1e-2 else 0.0
+    return 1.0 if abs(x - y) < 1e-2 else 0.0
 
 
 def sigmoid(x: float) -> float:
     r"""Return sigmoid of x as: $\frac{1.0}{(1.0 + e^{-x})}$ if x >=0 else $\frac{e^x}{(1.0 + e^{x})}$"""
-    return 1 / (1 + math.exp(-x)) if x >= 0 else math.exp(x) / (1 + math.exp(x))
+    return 1.0 / (1.0 + math.exp(-x)) if x >= 0 else math.exp(x) / (1.0 + math.exp(x))
 
 
 def relu(x: float) -> float:
@@ -82,9 +82,12 @@ def relu(x: float) -> float:
     return x if x >= 0 else 0.0
 
 
+EPS = 1e-6
+
+
 def log(x: float) -> float:
     """Returns the natural log of x"""
-    return math.log(x)
+    return math.log(x + EPS)
 
 
 def exp(x: float) -> float:
@@ -94,17 +97,17 @@ def exp(x: float) -> float:
 
 def inv(x: float) -> float:
     """Returns x's reciprocol"""
-    return 1 / x
+    return 1.0 / x
 
 
 def log_back(x: float, y: float) -> float:
     """Computes the derivative of log(x) times y"""
-    return y / x
+    return y / (x + EPS)
 
 
 def inv_back(x: float, y: float) -> float:
     """Computes the derivative of 1/x times y"""
-    return -y / x**2
+    return -(1.0 / x**2) * y
 
 
 def relu_back(x: float, y: float) -> float:
@@ -153,40 +156,56 @@ def zipWith(
     return zipWithf
 
 
+# def reduce(
+#     f: Callable[[float, float], float],
+# ) -> Callable[[float], Callable[[Iterable[float]], float]]:
+#     """Higher-order function that reduces an iterable to a value using function f"""
+
+#     def reducef(id: float) -> Callable[[Iterable[float]], float]:
+#         def reducefid(L: Iterable[float]) -> float:
+#             acc = id
+#             for x in L:
+#                 acc = f(acc, x)
+#             return acc
+
+#         return reducefid
+
+#     return reducef
+
+
 def reduce(
-    f: Callable[[float, float], float],
-) -> Callable[[float], Callable[[Iterable[float]], float]]:
+    fn: Callable[[float, float], float], start: float
+) -> Callable[[Iterable[float]], float]:
     """Higher-order function that reduces an iterable to a value using function f"""
 
-    def reducef(id: float) -> Callable[[Iterable[float]], float]:
-        def reducefid(L: Iterable[float]) -> float:
-            acc = id
-            for x in L:
-                acc = f(acc, x)
-            return acc
+    def _reduce(ls: Iterable[float]) -> float:
+        val = start
+        for l in ls:
+            val = fn(val, l)
+        return val
 
-        return reducefid
-
-    return reducef
+    return _reduce
 
 
 def negList(L: Iterable[float]) -> Iterable[float]:
     """Negate all elements in L using map"""
-    return map(lambda x: -x)(L)
+    return map(neg)(L)
 
 
 def addLists(L1: Iterable[float], L2: Iterable[float]) -> Iterable[float]:
     """Add corresponding elements from L1 and L2 using zipWith"""
-    return zipWith(lambda x, y: x + y)(L1, L2)
+    return zipWith(add)(L1, L2)
 
 
 def sum(L: Iterable[float]) -> float:
     """Sum all elements in a list using reduce"""
-    reduceAdd = reduce(lambda x, y: x + y)(0)
-    return reduceAdd(L)
+    # reduceAdd = reduce(lambda x, y: x + y)(0)
+    # return reduceAdd(L)
+    return reduce(add, 0.0)(L)
 
 
 def prod(L: Iterable[float]) -> float:
     """Calculate the product of all elements in L using reduce"""
-    reduceMult = reduce(lambda x, y: x * y)(1)
-    return reduceMult(L)
+    # reduceMult = reduce(lambda x, y: x * y)(1)
+    # return reduceMult(L)
+    return reduce(mul, 1.0)(L)
