@@ -31,23 +31,29 @@ class Module:
 
     def train(self) -> None:
         """Set the `training` flag of this and descendent to true."""
+        # def setTrain(mod: Module) -> None:
+        #     mod.training = True
+        #     for subModule in mod._modules.values():
+        #         setTrain(subModule)
 
-        def setTrain(mod: Module) -> None:
-            mod.training = True
-            for subModule in mod._modules.values():
-                setTrain(subModule)
+        # setTrain(self)
 
-        setTrain(self)
+        for m in self.modules():
+            m.train()
+        self.training = True
 
     def eval(self) -> None:
         """Set the `training` flag of this and descendent to false."""
+        # def setTrain(mod: Module) -> None:
+        #     mod.training = False
+        #     for subModule in mod._modules.values():
+        #         setTrain(subModule)
 
-        def setTrain(mod: Module) -> None:
-            mod.training = False
-            for subModule in mod._modules.values():
-                setTrain(subModule)
+        # setTrain(self)
 
-        setTrain(self)
+        for m in self.modules():
+            m.eval()
+        self.training = False
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -57,19 +63,30 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        data = dict()
+        # data = dict()
 
-        def recursiveGetParams(accPref: str, mod: Module) -> None:
-            pref = "" if accPref == "" else accPref + "."
-            # store my params
-            for pName, pVal in mod._parameters.items():
-                data[pref + pName] = pVal
-            # store subModule's params
-            for subModName, subMod in mod._modules.items():
-                recursiveGetParams(pref + subModName, subMod)
+        # def recursiveGetParams(accPref: str, mod: Module) -> None:
+        #     pref = "" if accPref == "" else accPref + "."
+        #     # store my params
+        #     for pName, pVal in mod._parameters.items():
+        #         data[pref + pName] = pVal
+        #     # store subModule's params
+        #     for subModName, subMod in mod._modules.items():
+        #         recursiveGetParams(pref + subModName, subMod)
 
-        recursiveGetParams("", self)
-        return [(k, v) for (k, v) in data.items()]
+        # recursiveGetParams("", self)
+        # return [(k, v) for (k, v) in data.items()]
+
+        parameters = {}
+        for k, v in self._parameters.items():
+            parameters[k] = v
+
+        # recurse down to children submodules
+        for mod_name, m in self._modules.items():
+            for k, v in m.named_parameters():
+                parameters[f"{mod_name}.k"] = v
+
+        return list(parameters.items())
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
