@@ -96,7 +96,7 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
             for parent in var.parents:
                 if not parent.is_constant():
                     dfs(parent)
-                    
+
         visited.add(var.unique_id)
         finish_order.append(var)
         return
@@ -125,19 +125,29 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     deriv_dict[variable.unique_id] = deriv
 
     for var in topo_order:
-        # do chain rule passing d_output (deriv) through var's parents, add to intermediate derivs
-        # since vars are processed in topological order, by the time we need to do chain rule on it
-        # we would have already have d_outputs = accumulated derivs from all of its parents
-        if not var.is_leaf():
-            for parent, parent_deriv in var.chain_rule(deriv_dict[var.unique_id]):
-                # note that multivariate chain rule: h'(f(x), g(x)) = h'(f)f'(x) + h'(g)g'(x)
-                deriv_dict[parent.unique_id] = (
-                    deriv_dict.get(parent.unique_id, 0) + parent_deriv
-                )
-
-        # at leaf, we've aready calculated the derivative wrt of it, so store it with 'accumulate_derivative'
+        deriv = deriv_dict[var.unique_id]
+        if var.is_leaf():
+            var.accumulate_derivative(deriv)
         else:
-            var.accumulate_derivative(deriv_dict[var.unique_id])
+            for v, d in var.chain_rule(deriv):
+                if v.is_constant():
+                    continue
+                deriv_dict.setdefault(v.unique_id, 0.0)
+                deriv_dict[v.unique_id] = deriv_dict[v.unique_id] + d
+
+        # # do chain rule passing d_output (deriv) through var's parents, add to intermediate derivs
+        # # since vars are processed in topological order, by the time we need to do chain rule on it
+        # # we would have already have d_outputs = accumulated derivs from all of its parents
+        # if not var.is_leaf():
+        #     for parent, parent_deriv in var.chain_rule(deriv_dict[var.unique_id]):
+        #         # note that multivariate chain rule: h'(f(x), g(x)) = h'(f)f'(x) + h'(g)g'(x)
+        #         deriv_dict[parent.unique_id] = (
+        #             deriv_dict.get(parent.unique_id, 0) + parent_deriv
+        #         )
+
+        # # at leaf, we've aready calculated the derivative wrt of it, so store it with 'accumulate_derivative'
+        # else:
+        #     var.accumulate_derivative(deriv_dict[var.unique_id])
 
 
 @dataclass
