@@ -277,7 +277,7 @@ class Tensor:
 
         Args:
         ----
-            d_output (tensor, opt): starting derivative to backpropagate through the model
+            grad_output (tensor, opt): starting derivative to backpropagate through the model
 
         Returns:
         -------
