@@ -31,20 +31,24 @@ class Linear(minitorch.Module):
         super().__init__()
         self.weights = RParam(in_size, out_size)
         self.bias = RParam(out_size)
+        self.out_size = out_size
 
 
     def forward(self, inputs):
-        """weight matrix mult input then add bias"""
+        """weight matrix mult input then add bias, output a tensor"""
         # type Parameter .value is the tensor
-        in_size = len(inputs)
-        out_size = len(self.bias)
-        output = [self.bias[i].value for i in range(out_size)]
+        # inputs = list of tensors, each representing a data point initially
+        # return self.weights.value * inputs + self.bias.value
+        
+        # initially call fwd on dataset which has shape (num_pts, 2) = (num_pts, in_size) for first layer
+        num_pts, in_size = inputs.shape
+        # first layer weight has shape (in_size, out_size) = (2, hidden_layers)
+        # want to broadcast so that (1, in_size, out_size) and (num_pts, in_size, 1)
+        matix_mul = (self.weights.value.view(1, in_size, self.out_size) * inputs.view(num_pts, in_size, 1)).sum(1).view(num_pts, self.out_size)
+        # result is (num_pts, out_size), i.e. one output for each datapoint
 
-        for i in range(out_size):
-            for j in range(in_size):
-                output[i] += self.weights[j][i].value * inputs[j]
-
-        return output
+        return matix_mul + self.bias.value.view(1, self.out_size)
+    
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
