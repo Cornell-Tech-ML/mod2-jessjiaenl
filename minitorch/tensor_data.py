@@ -99,13 +99,13 @@ def broadcast_index(
     # after broadcasting small to big and try to edit big, want to find corres index in small
 
     # if dim(big) > dim(small), they must align from the right cuz we could only have added dim on left of small
-    for i in range(len(shape) - 1, -1, -1):
+    for i in range(len(shape)):
         # if size of this dim is equal, idx is just the same
-        if big_shape[i] == shape[i]:
-            out_index[i] = big_index[i]
+        if big_shape[-1-i] == shape[-1-i]:
+            out_index[-1-i] = big_index[-1-i]
         # if size of this dim is not equal but the small was 1, then small idx is just 0
-        elif shape[i] == 1:
-            out_index[i] = 0
+        elif shape[-1-i] == 1:
+            out_index[-1-i] = 0
         # if size not equal and small is not 1, then we could not have broadcasted this, exception
         else:
             raise IndexingError(
