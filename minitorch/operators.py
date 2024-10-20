@@ -120,6 +120,7 @@ def sigmoid_back(x: float, y: float) -> float:
     return mul(mul(sigmoid(x), add(1, neg(sigmoid(x)))), y)
     # y * (sigmoid(x) * (1-sigmoid(x)))
 
+
 # ## Task 0.3
 
 # Small practice library of elementary higher-order functions.
